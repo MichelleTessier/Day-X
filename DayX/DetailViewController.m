@@ -7,11 +7,15 @@
 //
 
 #import "DetailViewController.h"
+#import "EntryController.h"
+#import "Entry.h"
 
 @interface DetailViewController () <UITextFieldDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *textField;
 @property (weak, nonatomic) IBOutlet UITextView *textView;
+@property (weak, nonatomic) IBOutlet UILabel *dateLabel;
+
 @property (nonatomic, readwrite) UIResponder *inputAccessoryViewController;
 @property (nonatomic, strong) NSArray *greetings;
 
@@ -36,14 +40,16 @@
     
     self.textView.inputAccessoryView = toolBar;
     
-  NSInteger count = self.greetings.count;
+    //random integer to get random greeting
+    
+    NSInteger count = self.greetings.count;
     
     NSInteger randomIndex = arc4random_uniform(count);
     
-
     self.textField.placeholder = self.greetings[randomIndex];
     
     
+    [self updateWithEntry:self.entry];
     
 }
 
@@ -57,6 +63,79 @@
     // Dispose of any resources that can be recreated.
 }
 
+
+
+#pragma mark-save button and update entry
+
+- (IBAction)saveButtonTapped {
+    //for if an entry already exists
+    
+    if (self.entry){
+        
+        self.entry.title = self.textField.text;
+        self.entry.bodyText = self.textView.text;
+        NSDate *now = [NSDate date];
+        self.entry.timeStamp = now;
+        
+    
+      
+        
+    }else{
+        
+        //for if a new entry needs to be created
+        Entry *entry = [Entry new];
+        
+        entry.title = self.textField.text;
+        entry.bodyText = self.textView.text;
+        NSDate *now = [NSDate date];
+        entry.timeStamp = now;
+   
+    EntryController *entryController = [EntryController sharedInstance];
+    [entryController addEntry:entry];
+        
+       
+        
+    }
+    
+     [[EntryController sharedInstance] save];
+    
+    //save pops back to table view
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)updateWithEntry:(Entry *)entry{
+    self.textField.text = entry.title;
+    self.textView.text = entry.bodyText;
+    NSDateFormatter *dateFormatter = [NSDateFormatter new];
+    dateFormatter.dateStyle = NSDateFormatterMediumStyle;
+    dateFormatter.timeStyle = NSDateFormatterShortStyle;
+    NSDate *entryDate = entry.timeStamp;
+    NSString *prettyDate = [dateFormatter stringFromDate:entryDate];
+    self.dateLabel.text = prettyDate;
+   
+}
+
+#pragma mark- clear text view with button feature
+
+
+- (IBAction)clearTextView:(id)sender {
+   self.textField.text = @"";
+
+    self.textView.text = @"";
+}
+
+
+#pragma mark-resign first responder
+
+//resign first responder in textview (body text) with tap on screen (so return can be used to add
+    //space to journal entry
+
+- (IBAction)userTapped:(id)sender {
+    [self.textView resignFirstResponder];
+}
+
+//resign first responder in textfield (title) with return button
+
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     
     [textField resignFirstResponder];
@@ -64,15 +143,7 @@
     return YES;
 }
 
-- (IBAction)userTapped:(id)sender {
-    [self.textView resignFirstResponder];
-}
-
-- (IBAction)clearTextView:(id)sender {
-   self.textField.text = @"";
-
-    self.textView.text = @"";
-}
+#pragma mark- funky feature methods (delete text when shaken and random greetings)
 
 -(NSArray *)greetings{
     return @[@"What's a shakin?", @"Talk at me, yo...", @"What's up, buttercup?", @"I don't care today..."];

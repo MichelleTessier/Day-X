@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Entry.h"
 
 @interface DetailViewController : UIViewController
 
 @property (nonatomic, strong) NSString *typeHere;
+@property (nonatomic, strong) Entry *entry;
 
 @end

@@ -13,17 +13,21 @@ static NSString *entryCell = @"entryCell";
 @implementation ListTableViewDataSource 
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return 5;
+    return [EntryController sharedInstance].entries.count;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:entryCell];
     
-    cell.textLabel.text = [NSString stringWithFormat:@"Entry %ld", ((long)indexPath.row) +1];
+    Entry *entry = [EntryController sharedInstance].entries[indexPath.row];
+    
+    cell.textLabel.text= entry.title;
     
     return cell;
 }
+
+
 
 
 
